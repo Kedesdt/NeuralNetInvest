@@ -66,7 +66,13 @@ class Network(object):
                 self.update_mini_batch(mini_batch, eta)
             
             if test_data:
-                print("Epoch {} : {} / {}".format(j,self.evaluate(test_data),n_test));
+
+
+                if j % 1 == 0:
+                    print("Epoch {} : Erro: {} / {}".format(j,self.evaluate(test_data),n_test))
+                else:
+                    print("Epoch {} finalizada".format(j))
+
             else:
                 print("Epoch {} finalizada".format(j))
 
@@ -130,8 +136,22 @@ class Network(object):
          é considerada o índice de qualquer que seja
          neurônio na camada final que tenha a maior ativação."""
 
-        test_results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
+        random.shuffle(test_data)
+        e = 0
+        for (x, y) in test_data:
+
+            r = self.feedforward(x)
+
+            #if e==0:
+            #    print(r)
+            #    print(y)
+
+            for i in range(len(y)):
+                e += abs(r[i][0] - y[i][0])
+
+        #test_results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
+        #return sum(int(x == y) for (x, y) in test_results)
+        return e / len(y)
 
     def cost_derivative(self, output_activations, y):
         """Retorna o vetor das derivadas parciais."""
