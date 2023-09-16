@@ -8,8 +8,8 @@ import numpy
 
 
 
-QUANTIDADE = 6
-QUANTIDADE_DE_ACOES = 3
+QUANTIDADE = 2
+QUANTIDADE_DE_ACOES = 1
 
 CAPITAL_INICIAL = 100000
 
@@ -36,7 +36,7 @@ class Investidor:
 
         self.ativos = []
         for i in self.df.keys():
-            self.ativos[i] = Ativo(0, i)
+            self.ativos.append(Ativo(0, i))
         self.patrimonio = CAPITAL_INICIAL
         self.dinheiro_disponivel = self.patrimonio
         self.compras = 0
@@ -171,7 +171,7 @@ td = data[indice:]
 d = data[:indice]
 
 neuralnet = nn.Network([30, 25, 20, 4])
-neuralnet.SGD(d, 50, 500, 0.01, td)
+neuralnet.SGD(d, 10, 500, 0.01, td)
 
 
 df = yf.download(carteira, start='2022-01-01', end="2023-01-01")["Adj Close"]
@@ -180,8 +180,7 @@ df = df.dropna(axis=0, how='all')
 
 
 inv = Investidor(neuralnet, df)
-
-#inv.invest()
+inv.invest()
 
 
 
