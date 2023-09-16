@@ -34,6 +34,10 @@ class Network(object):
         self.sizes = sizes
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
+        self.errup = False
+        self.contup = 0
+        self.maxerrup = 20
+        self.lasterr = 0
 
     def feedforward(self, a):
         """Retorna a saída da rede se `a` for input."""
@@ -59,6 +63,9 @@ class Network(object):
             n_test = len(test_data)
 
         for j in range(epochs):
+            if self.errup:
+                print("Erro aumentando")
+                break
             random.shuffle(training_data)
             mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n, mini_batch_size)]
             
@@ -148,6 +155,14 @@ class Network(object):
 
             for i in range(len(y)):
                 e += abs(r[i][0] - y[i][0])
+
+        if self.lasterr < e:
+            self.contup += 1
+        else:
+            self.contup = 0
+
+        self.errup = self.contup >= self.maxerrup
+        self.lasterr = e
 
         #test_results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
         #return sum(int(x == y) for (x, y) in test_results)

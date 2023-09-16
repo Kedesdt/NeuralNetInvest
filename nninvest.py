@@ -7,9 +7,10 @@ import investpy as inv
 import numpy
 
 
-
-QUANTIDADE = 2
-QUANTIDADE_DE_ACOES = 1
+IBOV_JAN2022 = 104700
+IBOV_JAN2023 = 109900
+QUANTIDADE = 10
+QUANTIDADE_DE_ACOES = 5
 
 CAPITAL_INICIAL = 100000
 
@@ -35,10 +36,13 @@ class Investidor:
         self.df = df
 
         self.ativos = []
+
         for i in self.df.keys():
             self.ativos.append(Ativo(0, i))
+        self.nomes_ativos = [ativo.nome for ativo in self.ativos]
         self.patrimonio = CAPITAL_INICIAL
         self.dinheiro_disponivel = self.patrimonio
+        self.dinheiro_investido = 0
         self.compras = 0
         self.vendas = 0
         self.valor_comprado = 0
@@ -57,10 +61,12 @@ class Investidor:
                 return i
 
     def vende_ativo(self, ativo):
+
         valor = ativo.cotas_compradas * ativo.valor
         self.dinheiro_disponivel += valor
         ativo.cotas_compradas = 0
-        self.vendas += 1
+        if valor > 0:
+            self.vendas += 1
         self.valor_vendido += valor
 
     def compra_ativo(self, ativo, valor):
@@ -68,7 +74,7 @@ class Investidor:
         self.compras += 1
         self.valor_comprado += valor
         self.dinheiro_disponivel -= valor
-        ativo.cotas_compradas = valor / ativo.valor
+        ativo.cotas_compradas += valor / ativo.valor
 
 
     def invest(self):
@@ -80,7 +86,7 @@ class Investidor:
             saidas = {}
             predicoes = []
 
-            for key in self.ativos:
+            for key in self.nomes_ativos:
 
                 if key == "Date":
                     continue
@@ -108,20 +114,29 @@ class Investidor:
 
             q = QUANTIDADE - QUANTIDADE_DE_ACOES
             valor = self.dinheiro_disponivel / q
+            if valor > 0:
+                for i in range(len(ativos_na_ordem)):
+                    if i >= QUANTIDADE_DE_ACOES:
+                        self.compra_ativo(ativos_na_ordem[i], valor)
 
-            for i in range(len(ativos_na_ordem)):
-                if i >= QUANTIDADE_DE_ACOES:
-                    self.vende_ativo(ativos_na_ordem[i])
+            self.dinheiro_investido = 0
+            for ativo in self.ativos:
+                self.dinheiro_investido += ativo.cotas_compradas * ativo.valor
+            self.patrimonio = self.dinheiro_disponivel + self.dinheiro_investido
 
         self.print()
 
     def print(self):
 
-        print("Patrimonio: ", self.patrimonio,
-               "Compras: ", self.compras,
-                "Vendas: ", self.vendas,
-                "Valor_Comprado: ", self.valor_comprado,
-                "Valor_Vendido: ", self.valor_vendido)
+        print("Patrimonio Final: ", self.patrimonio,
+              "\nPatrimonio Inicial: ", CAPITAL_INICIAL,
+              "\nGanho: ", self.patrimonio / CAPITAL_INICIAL,
+              "\nRelação RedeNeural/Ibovespa: ",
+              (self.patrimonio / CAPITAL_INICIAL) / (IBOV_JAN2023 / IBOV_JAN2022),
+              "\nCompras: ", self.compras,
+              "\nVendas: ", self.vendas,
+              "\nValor_Comprado: ", self.valor_comprado,
+              "\nValor_Vendido: ", self.valor_vendido)
 
 
 
@@ -136,7 +151,23 @@ for a in br['symbol']:
         i += 1
 
     if i >= QUANTIDADE:
-        break
+        pass
+
+print(carteira)
+
+"""Itaúsa (ITSA4) – Financeiro: Brasil – 10%
+Suzano (SUZB3) – Papel e Celulose: Brasil – 10%
+Petrobras (PETR4) – Óleo e Gás: Brasil – 10%
+JBS (JBSS3) – Transportes: Brasil – 10%
+Rumo Logística (RAIL3) – Transportes: Brasil – 10%
+Goldman Sachs (C1TV34) – Financeiro: EUA – 10%
+The Mosaic (MOSC34) – Agro: EUA – 10%
+Braskem (BRKM5) – Hotéis: EUA – 10%
+Alphabet (GOGL34) – Tecnologia: EUA – 10%
+Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
+
+carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
+            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
 
 
 dt = yf.download(carteira, start='2012-01-01', end="2022-01-01")["Adj Close"]
@@ -171,7 +202,7 @@ td = data[indice:]
 d = data[:indice]
 
 neuralnet = nn.Network([30, 25, 20, 4])
-neuralnet.SGD(d, 10, 500, 0.01, td)
+neuralnet.SGD(d, 200, 500, 0.005, td)
 
 
 df = yf.download(carteira, start='2022-01-01', end="2023-01-01")["Adj Close"]
