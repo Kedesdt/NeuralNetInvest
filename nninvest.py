@@ -23,6 +23,7 @@ class Ativo():
 
         self.nome = nome
         self.valor = valor
+        self.cotas_compradas = 0
         self.predicao = 0
 
 
@@ -37,15 +38,38 @@ class Investidor:
         for i in self.df.keys():
             self.ativos[i] = Ativo(0, i)
         self.patrimonio = CAPITAL_INICIAL
-
+        self.dinheiro_disponivel = self.patrimonio
         self.compras = 0
         self.vendas = 0
+        self.valor_comprado = 0
+        self.valor_vendido = 0
 
     def get_by_name(self, name):
 
         for i in self.ativos:
             if i.nome == name:
                 return i
+
+    def get_by_pre(self, pre):
+
+        for i in self.ativos:
+            if i.predicao == pre:
+                return i
+
+    def vende_ativo(self, ativo):
+        valor = ativo.cotas_compradas * ativo.valor
+        self.dinheiro_disponivel += valor
+        ativo.cotas_compradas = 0
+        self.vendas += 1
+        self.valor_vendido += valor
+
+    def compra_ativo(self, ativo, valor):
+
+        self.compras += 1
+        self.valor_comprado += valor
+        self.dinheiro_disponivel -= valor
+        ativo.cotas_compradas = valor / ativo.valor
+
 
     def invest(self):
 
@@ -54,6 +78,7 @@ class Investidor:
             d = self.df[i - 29:i + 1].copy()
 
             saidas = {}
+            predicoes = []
 
             for key in self.ativos:
 
@@ -68,7 +93,35 @@ class Investidor:
                 saidas[key] = neuralnet.feedforward(entrada)
                 ativo.valor = d[key].values[-1]
                 ativo.predicao = saidas[key][0][0]
+                predicoes.append(saidas[key][0][0])
 
+            predicoes.sort()
+
+            ativos_na_ordem = []
+
+            for i in predicoes:
+                ativos_na_ordem.append(self.get_by_pre(i))
+
+            for i in range(len(ativos_na_ordem)):
+                if i < QUANTIDADE_DE_ACOES:
+                    self.vende_ativo(ativos_na_ordem[i])
+
+            q = QUANTIDADE - QUANTIDADE_DE_ACOES
+            valor = self.dinheiro_disponivel / q
+
+            for i in range(len(ativos_na_ordem)):
+                if i >= QUANTIDADE_DE_ACOES:
+                    self.vende_ativo(ativos_na_ordem[i])
+
+        self.print()
+
+    def print(self):
+
+        print("Patrimonio: ", self.patrimonio,
+               "Compras: ", self.compras,
+                "Vendas: ", self.vendas,
+                "Valor_Comprado: ", self.valor_comprado,
+                "Valor_Vendido: ", self.valor_vendido)
 
 
 
