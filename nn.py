@@ -36,7 +36,7 @@ class Network(object):
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
         self.errup = False
         self.contup = 0
-        self.maxerrup = 20
+        self.maxerrup = 200
         self.lasterr = 0
 
     def feedforward(self, a):
