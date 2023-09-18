@@ -36,7 +36,7 @@ class Network(object):
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
         self.errup = False
         self.contup = 0
-        self.maxerrup = 200
+        self.maxerrup = 20000
         self.lasterr = 0
 
     def feedforward(self, a):
@@ -58,6 +58,9 @@ class Network(object):
         training_data = list(training_data)
         n = len(training_data)
 
+        l = int(len(training_data) * 0.8)
+        td2 = training_data[l:]
+
         if test_data:
             test_data = list(test_data)
             n_test = len(test_data)
@@ -76,10 +79,10 @@ class Network(object):
 
 
                 if j % 1 == 0:
-                    print("Epoch {} : Erro: {} / {}".format(j,self.evaluate(test_data),n_test))
+                    print("Epoch {} : Erro: {} / {}".format(j,self.evaluate(test_data),n_test), end= " ")
                 else:
                     print("Epoch {} finalizada".format(j))
-
+                print("Erro 2: {} / {}".format(self.evaluate(td2), len(td2)))
             else:
                 print("Epoch {} finalizada".format(j))
 

@@ -16,13 +16,13 @@ DITR = '2021-01-02'
 DFTR = '2022-01-02'
 
 DITES = '2022-01-02'
-DFTES = '2023-01-02'
+DFTES = '2022-07-02'
 
 EPOCAS = 30000
 MINIBATCH = 30
-TAXA = 0.001
+TAXA = 0.0001
 DIAS = 1
-NEURONIOSDEENTRADA = 30
+NEURONIOSDEENTRADA = 60
 
 CAPITAL_INICIAL = 100000
 
@@ -39,6 +39,8 @@ class Ativo():
         self.valor = valor
         self.cotas_compradas = 0
         self.predicao = 0
+        self.comprado = False
+        self.tempo = 0
 
 
 class Investidor:
@@ -48,6 +50,8 @@ class Investidor:
         self.rede = rede
         self.df = df
         self.dv = dv
+
+        self.trades = []
 
         self.ativos = []
 
@@ -75,21 +79,28 @@ class Investidor:
             if i.predicao == pre:
                 return i
 
-    def vende_ativo(self, ativo):
+    def vende_ativo(self, ativo, i):
 
         valor = ativo.cotas_compradas * ativo.valor
         self.dinheiro_disponivel += valor
         ativo.cotas_compradas = 0
         if valor > 0:
             self.vendas += 1
+            if ativo.comprado:
+                t = i - ativo.tempo
+                self.trades.append(t)
+                ativo.tempo = 0
+                ativo.comprado = False
         self.valor_vendido += valor
 
-    def compra_ativo(self, ativo, valor):
+    def compra_ativo(self, ativo, valor, i):
 
+        ativo.tempo = i
         self.compras += 1
         self.valor_comprado += valor
         self.dinheiro_disponivel -= valor
         ativo.cotas_compradas += valor / ativo.valor
+        ativo.comprado = True
 
     def calcula_medio(self):
         m = 0
@@ -116,7 +127,7 @@ class Investidor:
                 Date = d.axes[0][-1]
                 ativo.valor = d[key].values[-1]
                 entrada = d[key].values < d[key].values[-1]
-                #entrada = numpy.append(entrada, d[key].values < d[key].values[-1])
+                entrada = numpy.append(entrada, d[key].values < d[key].values[-1])
                 entrada = entrada.reshape(len(entrada), 1)
                 saidas[key] = neuralnet.feedforward(entrada)
                 ativo.valor = d[key].values[-1]
@@ -129,23 +140,32 @@ class Investidor:
                 continue
 
             ativos_na_ordem = []
+            comprar = []
+
             err = False
-            for i in predicoes:
-                ativos_na_ordem.append(self.get_by_pre(i))
+            for j in predicoes:
+                ativos_na_ordem.append(self.get_by_pre(j))
                 if ativos_na_ordem[-1] is None:
                     err = True
             if err:
                 continue
-            for i in range(len(ativos_na_ordem)):
-                if i < QUANTIDADE_DE_ACOES:
-                    self.vende_ativo(ativos_na_ordem[i])
+            for j in range(len(ativos_na_ordem)):
+                #if i < QUANTIDADE_DE_ACOES:
+                #    self.vende_ativo(ativos_na_ordem[i])
+                if ativos_na_ordem[j].predicao < 0.5:
+                    self.vende_ativo(ativos_na_ordem[j], i)
+                else:
+                    comprar.append(ativos_na_ordem[j])
 
-            q = QUANTIDADE - QUANTIDADE_DE_ACOES
+            #q = QUANTIDADE - QUANTIDADE_DE_ACOES
+            q = len(comprar)
+            if not q:
+                q = 1
             valor = self.dinheiro_disponivel / q
             if valor > 0:
-                for i in range(len(ativos_na_ordem)):
-                    if i >= QUANTIDADE_DE_ACOES:
-                        self.compra_ativo(ativos_na_ordem[i], valor)
+                for j in comprar:
+                    #if i >= QUANTIDADE_DE_ACOES:
+                    self.compra_ativo(j, valor, i)
 
             self.dinheiro_investido = 0
             for ativo in self.ativos:
@@ -158,6 +178,12 @@ class Investidor:
 
     def print(self):
 
+        media = len(self.trades) / (len(self.df) / 30)
+        if len(self.trades):
+            tempomedio = sum(self.trades) / len(self.trades)
+        else:
+            tempomedio = 0
+
         print("Patrimonio Final: ", self.patrimonio,
               "\nPatrimonio Inicial: ", CAPITAL_INICIAL,
               "\nGanho: ", self.patrimonio / CAPITAL_INICIAL,
@@ -168,6 +194,8 @@ class Investidor:
               (self.patrimonio / CAPITAL_INICIAL) / (self.ganho_medio),
               "\nCompras: ", self.compras,
               "\nVendas: ", self.vendas,
+              "\nTempo médio trade : ", tempomedio, "dias",
+              "\nMédia de : ", media, "trades por mês",
               "\nValor_Comprado: ", self.valor_comprado,
               "\nValor_Vendido: ", self.valor_vendido)
 
@@ -202,7 +230,7 @@ Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
 #            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
 
 carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
-carteira = ['AAPL34.SA', "GOGl34.SA"]
+#carteira = ['AAPL34.SA', "GOGl34.SA"]
 
 #carteira = ['ITUB4.SA', "BBDCA4.SA"]
 
@@ -226,7 +254,7 @@ for key in dt.keys():
         e = d[i - 29:i + 1].values
         entrada = e < e[-1]
         edv = dv[i-29:i+1].values
-        #entrada = numpy.append(entrada, edv < edv[-1])
+        entrada = numpy.append(entrada, edv < edv[-1])
         entrada = entrada.reshape(len(entrada), 1)
         saida = []
         ranges = [1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.1]
