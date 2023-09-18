@@ -58,8 +58,9 @@ class Network(object):
         training_data = list(training_data)
         n = len(training_data)
 
-        l = int(len(training_data) * 0.8)
-        td2 = training_data[l:]
+        l = int(len(training_data) * 0.2/0.8)
+        random.shuffle(training_data)
+        td2 = training_data[-l-1:]
 
         if test_data:
             test_data = list(test_data)
