@@ -15,6 +15,7 @@ O objetivo aqui é compreender bem os conceitos fundamentais e alguns conceitos 
 # Imports
 import random
 import numpy as np
+import json
 
 # Classe Network
 class Network(object):
@@ -36,7 +37,7 @@ class Network(object):
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
         self.errup = False
         self.contup = 0
-        self.maxerrup = 20000
+        self.maxerrup = 200
         self.lasterr = 0
 
     def feedforward(self, a):
@@ -218,6 +219,54 @@ class Network(object):
                                 self.weights[i][j][k] = 1
                             if self.weights[i][j][k] < - 1:
                                 self.weights[i][j][k] = - 1
+
+    def save(self):
+
+        self.num_layers
+        self.sizes
+        self.biases
+        self.weights
+
+        biases = []
+        for bias in self.biases:
+            biases.append(bias.tolist())
+
+        weights = []
+        for weight in self.weights:
+            weights.append(weight.tolist())
+
+        data = {"num_layers": self.num_layers,
+                "sizes": self.sizes,
+                "biases" : biases,
+                "weights": weights}
+
+        json_data = json.dumps(data)
+        file = open("nn.json", "w")
+        file.write(json_data)
+        file.close()
+
+    def load():
+
+        file = open("nn.json", 'r')
+        json_data = file.read()
+        data = json.loads(json_data)
+
+        biases = []
+
+        for bias in data["biases"]:
+            biases.append(np.array(bias))
+
+        weights = []
+
+        for weight in data["weights"]:
+            weights.append(np.array(weight))
+
+        new_nn = Network(data["sizes"])
+        new_nn.weights = weights
+        new_nn.biases = biases
+
+        return new_nn
+
 
 
 # Função de Ativação Sigmóide

@@ -12,11 +12,11 @@ IBOV_JAN2023 = 109900
 QUANTIDADE = 20
 QUANTIDADE_DE_ACOES = 10
 
-DITR = '2021-01-02'
+DITR = '2012-01-02'
 DFTR = '2022-01-02'
 
 DITES = '2022-01-02'
-DFTES = '2022-07-02'
+DFTES = '2023-01-02'
 
 EPOCAS = 30000
 MINIBATCH = 30
@@ -126,9 +126,10 @@ class Investidor:
                 ativo = self.get_by_name(key)
                 Date = d.axes[0][-1]
                 ativo.valor = d[key].values[-1]
-                entrada = d[key].values < d[key].values[-1]
-                entrada = numpy.append(entrada, d[key].values < d[key].values[-1])
-                entrada = entrada.reshape(len(entrada), 1)
+                #entrada = d[key].values < d[key].values[-1]
+                #entrada = numpy.append(entrada, dv[key].values < dv[key].values[-1])
+                #entrada = entrada.reshape(len(entrada), 1)
+                entrada = geraEntrada(d[key], dv[key])
                 saidas[key] = neuralnet.feedforward(entrada)
                 ativo.valor = d[key].values[-1]
                 ativo.predicao = saidas[key][0][0]
@@ -200,6 +201,23 @@ class Investidor:
               "\nValor_Vendido: ", self.valor_vendido)
 
 
+def geraEntrada(e, edv):
+
+    entrada = [0]
+
+    for ent in range(0, len(e) - 1):
+        entrada.append(e[ent] < e[ent + 1])
+
+    entrada2 = [0]
+    for ent in range(0, len(edv) - 1):
+        entrada2.append(edv[ent] < edv[ent + 1])
+
+    entrada = numpy.append(entrada, entrada2)
+    entrada = entrada.reshape(len(entrada), 1)
+
+
+    return entrada
+
 br = inv.stocks.get_stocks(country='brazil')
 carteira = []
 
@@ -226,10 +244,10 @@ Braskem (BRKM5) – Hotéis: EUA – 10%
 Alphabet (GOGL34) – Tecnologia: EUA – 10%
 Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
 
-#carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-#            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
+carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
+            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
 
-carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
+#carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
 #carteira = ['AAPL34.SA', "GOGl34.SA"]
 
 #carteira = ['ITUB4.SA', "BBDCA4.SA"]
@@ -252,10 +270,8 @@ for key in dt.keys():
     for i in range(29, len(d) - DIAS):
         #entrada = d[i-29:i+1].values / max(d[i-29:i+1].values)
         e = d[i - 29:i + 1].values
-        entrada = e < e[-1]
-        edv = dv[i-29:i+1].values
-        entrada = numpy.append(entrada, edv < edv[-1])
-        entrada = entrada.reshape(len(entrada), 1)
+        edv = dv[i - 29:i + 1].values
+        entrada = geraEntrada(e, edv)
         saida = []
         ranges = [1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.1]
         for j in range(DIAS):
@@ -273,7 +289,7 @@ td = data[indice:]
 #d = data[:indice]
 d = data[:indice]
 
-neuralnet = nn.Network([NEURONIOSDEENTRADA, 60, 60, DIAS])
+neuralnet = nn.Network([NEURONIOSDEENTRADA, 40, 20, DIAS])
 neuralnet.SGD(d, EPOCAS, MINIBATCH, TAXA, td)
 
 
