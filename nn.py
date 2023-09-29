@@ -249,6 +249,7 @@ class Network(object):
 
         file = open("nn.json", 'r')
         json_data = file.read()
+        file.close()
         data = json.loads(json_data)
 
         biases = []
