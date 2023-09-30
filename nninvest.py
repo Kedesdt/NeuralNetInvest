@@ -84,25 +84,26 @@ def main():
     td = data[indice:] # data[80:] pego 20% para testar se a rede está aprendendo
     #d = data[:indice]
     d = data[:indice] # 80% daos dados para treinar a rede
+    for i in range(constantes.NUMERODEREDES):
+        neuralnet = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
+        neuralnet.SGD(d, constantes.EPOCAS, constantes.MINIBATCH, constantes.TAXA, td)
+        neuralnet.save(str(i) + ".json")
 
-    neuralnet = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
-    neuralnet.SGD(d, constantes.EPOCAS, constantes.MINIBATCH, constantes.TAXA, td)
-    neuralnet.save()
+        data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
+        df = data['Adj Close']
+        df = df.dropna(axis=0, how='all')
+        dv = data['Volume']
+        dv = dv.dropna(axis=0, how='all')
 
-    data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
-    df = data['Adj Close']
-    df = df.dropna(axis=0, how='all')
-    dv = data['Volume']
-    dv = dv.dropna(axis=0, how='all')
-
-    ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
-    GANHO_IBOV = ibov.values[-1]/ibov.values[0]
-    #constantes.QUANTIDADE = len(df.keys())
-    #constantes.QUANTIDADE_DE_ACOES = int(constantes.QUANTIDADE/2)
+        ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
+        ibov = ibov.dropna(axis=0, how='all')
+        GANHO_IBOV = ibov.values[-1]/ibov.values[0]
+        #constantes.QUANTIDADE = len(df.keys())
+        #constantes.QUANTIDADE_DE_ACOES = int(constantes.QUANTIDADE/2)
 
 
-    inv = Investidor(neuralnet, df, dv, GANHO_IBOV)
-    inv.invest()
+        inv = Investidor(neuralnet, df, dv, GANHO_IBOV, ibov, ID = i)
+        inv.invest()
 
 if __name__ == "__main__":
     main()

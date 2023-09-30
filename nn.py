@@ -220,7 +220,7 @@ class Network(object):
                             if self.weights[i][j][k] < - 1:
                                 self.weights[i][j][k] = - 1
 
-    def save(self):
+    def save(self, name = 'nn.json'):
 
         self.num_layers
         self.sizes
@@ -241,7 +241,7 @@ class Network(object):
                 "weights": weights}
 
         json_data = json.dumps(data)
-        file = open("nn.json", "w")
+        file = open(name, "w")
         file.write(json_data)
         file.close()
 
