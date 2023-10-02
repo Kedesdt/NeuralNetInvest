@@ -169,15 +169,26 @@ class Investidor:
         plt.savefig(str(self.id) + "/" + nome + '.png')
         plt.clf()
         plt.figure(2)
+        data_rede_td = pd.DataFrame(data=self.rede.td_error, index=self.rede.index, columns=["Error"])
+        data_rede = pd.DataFrame(data=self.rede.error, index=self.rede.index, columns=["Error"])
+        plt.plot(data_rede_td, label="Erro Test_data", color='r')
+        plt.plot(data_rede, label="Erro Trainning_data", color='b')
+        plt.xlabel('Temporada')
+        plt.ylabel('Erro')
+        plt.title('Erros Trainning_data Test_data')
+        nome = "Erro" + time.strftime("%Y%m%d%H%M", time.localtime())
+        plt.legend()
+        plt.savefig(str(self.id) + "/" + nome + '.png')
+        plt.clf()
+        plt.figure(3)
         for key in self.nomes_ativos:
             plt.plot(self.df[key], label=key)
 
+        plt.legend()
+        plt.savefig("Ativos.png")
         #plt.show()
         plt.clf()
         self.ganho_medio = self.calcula_medio()
-
-
-
         self.print()
 
     def print(self):

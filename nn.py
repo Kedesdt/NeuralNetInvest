@@ -40,6 +40,9 @@ class Network(object):
         self.contup = 0
         self.maxerrup = 200
         self.lasterr = 0
+        self.td_error = []
+        self.error = []
+        self.index = []
 
     def feedforward(self, a):
         """Retorna a saída da rede se `a` for input."""
@@ -84,10 +87,18 @@ class Network(object):
 
 
                 if j % 1 == 0:
-                    print("Epoch {} : Erro: {} / {}".format(self.epochs_trained,self.evaluate(test_data),n_test), end= " ")
+                    e1 = self.evaluate(test_data)
+                    print("Epoch {} : Erro: {} / {}".format(self.epochs_trained,e1,n_test), end= " ")
+                    e1 = e1 / n_test
+                    self.td_error.append(e1)
                 else:
                     print("Epoch {} finalizada".format(self.epochs_trained))
-                print("Erro 2: {} / {}".format(self.evaluate(td2), len(td2)))
+
+                e2 = self.evaluate(td2)
+                print("Erro 2: {} / {}".format(e2, len(td2)))
+                e2 = e2 / len(td2)
+                self.error.append(e2)
+                self.index.append(j)
             else:
                 print("Epoch {} finalizada".format(self.epochs_trained))
 
