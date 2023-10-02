@@ -2,7 +2,8 @@
 
 IBOV_JAN2022 = 104700
 IBOV_JAN2023 = 109900
-QUANTIDADE = 20
+QUANTIDADE = 20 #Quantidade de redes neurais treinadas
+QUANTIDADEDEREPETICOES = 20 # quantidade de vezes em que o programa será reiniciado e refazer o teino
 QUANTIDADE_DE_ACOES = 10
 
 DITR = '2012-01-02'
