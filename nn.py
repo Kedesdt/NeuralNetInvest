@@ -20,7 +20,7 @@ import json
 # Classe Network
 class Network(object):
 
-    def __init__(self, sizes):
+    def __init__(self, sizes, epochs_trained = 0):
         """A lista `sizes` contém o número de neurônios nas
          respectivas camadas da rede. Por exemplo, se a lista
          for [2, 3, 1] então será uma rede de três camadas, com o
@@ -36,6 +36,7 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
         self.errup = False
+        self.epochs_trained = epochs_trained
         self.contup = 0
         self.maxerrup = 200
         self.lasterr = 0
@@ -76,6 +77,8 @@ class Network(object):
             
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
+
+            self.epochs_trained += 1
             
             if test_data:
 
@@ -238,16 +241,20 @@ class Network(object):
         data = {"num_layers": self.num_layers,
                 "sizes": self.sizes,
                 "biases" : biases,
-                "weights": weights}
+                "weights": weights,
+                "ep": self.epochs_trained}
 
         json_data = json.dumps(data)
         file = open(name, "w")
         file.write(json_data)
         file.close()
 
-    def load():
+    def load(name = "nn.json"):
 
-        file = open("nn.json", 'r')
+        try:
+            file = open(name, 'r')
+        except FileNotFoundError:
+            return None
         json_data = file.read()
         file.close()
         data = json.loads(json_data)
@@ -265,6 +272,7 @@ class Network(object):
         new_nn = Network(data["sizes"])
         new_nn.weights = weights
         new_nn.biases = biases
+        new_nn.epochs_trained = data['ep'] if "ep" in data else 0 
 
         return new_nn
 

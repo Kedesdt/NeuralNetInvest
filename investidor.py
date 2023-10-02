@@ -3,6 +3,7 @@ from constantes import *
 from funcoes import *
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 
 class Investidor:
 
@@ -16,18 +17,16 @@ class Investidor:
         self.ganho_ibov = ganho_ibov
         self.trades = []
         self.dataframe = pd.DataFrame()
+        self.dataframe_medio = pd.DataFrame()
         self.lista = []
         self.lista_ibov = []
+        self.lista_medio = []
         self.nome = "Adj Close"
         self.datas = []
-
         self.ativos = []
-
-        for i in self.df.keys():
-            self.ativos.append(Ativo(self.df[i].values[29], i))
-        self.nomes_ativos = [ativo.nome for ativo in self.ativos]
         #self.patrimonio = CAPITAL_INICIAL
         self.patrimonio = self.df_ibov.values[29]
+        self.patrimonio_medio = self.patrimonio
         self.dinheiro_disponivel = self.patrimonio
         self.dinheiro_investido = 0
         self.compras = 0
@@ -35,6 +34,12 @@ class Investidor:
         self.valor_comprado = 0
         self.valor_vendido = 0
         self.ganho_medio = None
+
+        for i in self.df.keys():
+            self.ativos.append(Ativo(self.df[i].values[29], i))
+        self.nomes_ativos = [ativo.nome for ativo in self.ativos]
+        for ativo in self.ativos:
+            ativo.cotas_compradas_se_medio = (self.patrimonio / len(self.ativos)) / ativo.valor
 
     def get_by_name(self, name):
 
@@ -95,6 +100,8 @@ class Investidor:
                 ativo = self.get_by_name(key)
                 date = d.axes[0][-1]
                 ativo.valor = d[key].values[-1]
+                if ativo.valor_inicial is None:
+                    ativo.valor_inicial = ativo.valor
                 #entrada = d[key].values < d[key].values[-1]
                 #entrada = numpy.append(entrada, dv[key].values < dv[key].values[-1])
                 #entrada = entrada.reshape(len(entrada), 1)
@@ -141,19 +148,25 @@ class Investidor:
             for ativo in self.ativos:
                 self.dinheiro_investido += ativo.cotas_compradas * ativo.valor
             self.patrimonio = self.dinheiro_disponivel + self.dinheiro_investido
+            self.patrimonio_medio = sum([ativo.cotas_compradas_se_medio * ativo.valor for ativo in self.ativos])
             self.lista.append(self.patrimonio)
             self.lista_ibov.append(self.df_ibov.values[i])
+            self.lista_medio.append(self.patrimonio_medio)
             self.datas.append(date)
 
 
         self.dataframe = pd.DataFrame(data = self.lista, index=self.datas, columns=["Adj Close"])
+        self.dataframe_medio = pd.DataFrame(data = self.lista_medio, index=self.datas, columns=["Adj Close"])
         plt.figure(1)
         plt.plot(self.dataframe, label="Patrimônio Robo", color="b")
         plt.plot(self.df_ibov, label="Ibovespa", color="r")
+        plt.plot(self.dataframe_medio, label="Medio Ativos", color="#00AAAA")
         plt.xlabel('Data')
         plt.ylabel('Patrimônio')
-        plt.title('Idade e Pontuação')
-        plt.savefig(str(self.id) + '.png')
+        plt.title('Patrimônio Robo, medio, Ibov')
+        plt.legend()
+        nome = time.strftime("%Y%m%d%H%M", time.localtime())
+        plt.savefig(str(self.id) + "/" + nome + '.png')
         plt.clf()
         plt.figure(2)
         for key in self.nomes_ativos:

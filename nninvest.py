@@ -8,6 +8,8 @@ import numpy
 from investidor import Investidor
 import constantes
 from funcoes import *
+import time
+import config
 
 
 def main():
@@ -51,7 +53,6 @@ def main():
     dt = data["Adj Close"]
     v = data["Volume"]
 
-
     data = []
     for key in dt.keys():
 
@@ -85,9 +86,20 @@ def main():
     #d = data[:indice]
     d = data[:indice] # 80% daos dados para treinar a rede
     for i in range(constantes.NUMERODEREDES):
-        neuralnet = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
+
+        config.inicial_config(str(i))
+
+        neuralnet = nn.Network.load(str(i) + "/nn.json")
+        if neuralnet:
+            print("Rede carregada")
+            print("Esta rede ja foi treinada %i vezes" %neuralnet.epochs_trained)
+        else:
+            print("Não existe Rede\nCriando nova")
+            neuralnet = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
+
         neuralnet.SGD(d, constantes.EPOCAS, constantes.MINIBATCH, constantes.TAXA, td)
-        neuralnet.save(str(i) + ".json")
+        #nome = strstr(i) + ".json"
+        neuralnet.save(str(i) + "/nn.json")
 
         data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
         df = data['Adj Close']
@@ -97,7 +109,7 @@ def main():
 
         ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
         ibov = ibov.dropna(axis=0, how='all')
-        GANHO_IBOV = ibov.values[-1]/ibov.values[0]
+        GANHO_IBOV = ibov.values[-1]/ibov.values[29]
         #constantes.QUANTIDADE = len(df.keys())
         #constantes.QUANTIDADE_DE_ACOES = int(constantes.QUANTIDADE/2)
 
@@ -107,12 +119,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
