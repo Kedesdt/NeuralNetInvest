@@ -84,12 +84,12 @@ class Network(object):
 
 
                 if j % 1 == 0:
-                    print("Epoch {} : Erro: {} / {}".format(j,self.evaluate(test_data),n_test), end= " ")
+                    print("Epoch {} : Erro: {} / {}".format(self.epochs_trained,self.evaluate(test_data),n_test), end= " ")
                 else:
-                    print("Epoch {} finalizada".format(j))
+                    print("Epoch {} finalizada".format(self.epochs_trained))
                 print("Erro 2: {} / {}".format(self.evaluate(td2), len(td2)))
             else:
-                print("Epoch {} finalizada".format(j))
+                print("Epoch {} finalizada".format(self.epochs_trained))
 
     def update_mini_batch(self, mini_batch, eta):
         """Atualiza os pesos e bias da rede aplicando
