@@ -26,6 +26,7 @@ class Investidor:
         self.ativos = []
         #self.patrimonio = CAPITAL_INICIAL
         self.patrimonio = self.df_ibov.values[29]
+        self.capital_inicial = self.patrimonio
         self.patrimonio_medio = self.patrimonio
         self.dinheiro_disponivel = self.patrimonio
         self.dinheiro_investido = 0
@@ -200,13 +201,13 @@ class Investidor:
             tempomedio = 0
 
         print("Patrimonio Final: ", self.patrimonio,
-              "\nPatrimonio Inicial: ", CAPITAL_INICIAL,
-              "\nGanho do Robô: ", self.patrimonio / CAPITAL_INICIAL,
+              "\nPatrimonio Inicial: ", self.capital_inicial,
+              "\nGanho do Robô: ", self.patrimonio / self.capital_inicial,
               "\nGanho medio da ações: ", self.ganho_medio,
               "\nRelação Robô/Ibovespa: ",
-              (self.patrimonio / CAPITAL_INICIAL) / (self.ganho_ibov),
+              (self.patrimonio / self.capital_inicial) / (self.ganho_ibov),
               "\nRelação Robô/Ganho medio das ações: ",
-              (self.patrimonio / CAPITAL_INICIAL) / (self.ganho_medio),
+              (self.patrimonio / self.capital_inicial) / (self.ganho_medio),
               "\nCompras: ", self.compras,
               "\nVendas: ", self.vendas,
               "\nTempo médio trade : ", tempomedio, "dias",
