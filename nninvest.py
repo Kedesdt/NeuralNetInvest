@@ -27,19 +27,21 @@ def main():
 
     print(carteira)
 
-    """Itaúsa (ITSA4) – Financeiro: Brasil – 10%
-    Suzano (SUZB3) – Papel e Celulose: Brasil – 10%
-    Petrobras (PETR4) – Óleo e Gás: Brasil – 10%
-    JBS (JBSS3) – Transportes: Brasil – 10%
-    Rumo Logística (RAIL3) – Transportes: Brasil – 10%
-    Goldman Sachs (C1TV34) – Financeiro: EUA – 10%
-    The Mosaic (MOSC34) – Agro: EUA – 10%
-    Braskem (BRKM5) – Hotéis: EUA – 10%
-    Alphabet (GOGL34) – Tecnologia: EUA – 10%
-    Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
+    """    
+    01 - Magazine Luiza (MGLU3) - Varejo
+    02 - Americanas (AMER3) - Varejo
+    03 - PetroRio (PRIO3) - Minas e gas
+    04 - Eletrobras (ELET3)
+    05 - Rede D'Or (RDOR3) - saúde
+    06 - Embraer (EMBR3) - aeroespacial
+    07 - Sabesp (SBSP3) - serviço
+    08 - Totvs (TOTS3) - tecnologia
+    09 - Vivo (VIVT3) - telefonia
+    10 - Banco Santande (SANB3) - financeiro
+    """
 
-    carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-                "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
+    carteira = ["MGLU3.SA", "AMER3.SA", 'PRIO3.SA', 'ELET3.SA', "RDOR3.SA",
+                "EMBR3.SA", "SBSP3.SA", "TOTS3.SA", "VIVT3.SA", 'SANB3.SA']
 
     #carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
     #carteira = ['AAPL34.SA', "GOGl34.SA"]

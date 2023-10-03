@@ -241,13 +241,13 @@ class Network(object):
                 "weights": weights}
 
         json_data = json.dumps(data)
-        file = open("nn.json", "w")
+        file = open("rede1.json", "w")
         file.write(json_data)
         file.close()
 
     def load():
 
-        file = open("nn.json", 'r')
+        file = open("rede1.json", 'r')
         json_data = file.read()
         file.close()
         data = json.loads(json_data)
