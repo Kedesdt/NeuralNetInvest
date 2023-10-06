@@ -7,10 +7,10 @@ import time
 
 class Investidor:
 
-    def __init__(self, rede, df, dv, ganho_ibov = 1, df_ibov = None, ID = 1):
+    def __init__(self, df, dv, ganho_ibov = 1, df_ibov = None, ID = 1, ativos = None):
 
         self.id = ID
-        self.rede = rede
+        self.ativos_treinados = ativos
         self.df = df
         self.dv = dv
         self.df_ibov = df_ibov
@@ -26,6 +26,7 @@ class Investidor:
         self.ativos = []
         #self.patrimonio = CAPITAL_INICIAL
         self.patrimonio = self.df_ibov.values[29]
+        self.capital_inicial = self.patrimonio
         self.patrimonio_medio = self.patrimonio
         self.dinheiro_disponivel = self.patrimonio
         self.dinheiro_investido = 0
@@ -100,13 +101,23 @@ class Investidor:
                 ativo = self.get_by_name(key)
                 date = d.axes[0][-1]
                 ativo.valor = d[key].values[-1]
+                if ativo.valor_anterior:
+                    if ativo.comprado:
+                        if ativo.valor < ativo.valor_anterior:
+                            ativo.erros += 1
+                        else:
+                            ativo.acertos += 1
+                    else:
+                        if ativo.valor > ativo.valor_anterior:
+                            ativo.erros += 1
+                        else:
+                            ativo.acertos += 1
+                ativo.valor_anterior = ativo.valor
                 if ativo.valor_inicial is None:
                     ativo.valor_inicial = ativo.valor
-                #entrada = d[key].values < d[key].values[-1]
-                #entrada = numpy.append(entrada, dv[key].values < dv[key].values[-1])
-                #entrada = entrada.reshape(len(entrada), 1)
+
                 entrada = geraEntrada(d[key], dv[key])
-                saidas[key] = self.rede.feedforward(entrada)
+                saidas[key] = self.ativo_por_nome(key).rede.feedforward(entrada)
                 ativo.valor = d[key].values[-1]
                 ativo.predicao = saidas[key][0][0]
                 predicoes.append(saidas[key][0][0])
@@ -154,10 +165,11 @@ class Investidor:
             self.lista_medio.append(self.patrimonio_medio)
             self.datas.append(date)
 
-
+        index = 1
         self.dataframe = pd.DataFrame(data = self.lista, index=self.datas, columns=["Adj Close"])
         self.dataframe_medio = pd.DataFrame(data = self.lista_medio, index=self.datas, columns=["Adj Close"])
-        plt.figure(1)
+        plt.figure(index)
+        index+=1
         plt.plot(self.dataframe, label="Patrimônio Robo", color="b")
         plt.plot(self.df_ibov, label="Ibovespa", color="r")
         plt.plot(self.dataframe_medio, label="Medio Ativos", color="#00AAAA")
@@ -168,19 +180,23 @@ class Investidor:
         nome = time.strftime("%Y%m%d%H%M", time.localtime())
         plt.savefig(str(self.id) + "/" + nome + '.png')
         plt.clf()
-        plt.figure(2)
-        data_rede_td = pd.DataFrame(data=self.rede.td_error, index=self.rede.index, columns=["Error"])
-        data_rede = pd.DataFrame(data=self.rede.error, index=self.rede.index, columns=["Error"])
-        plt.plot(data_rede_td, label="Erro Test_data", color='r')
-        plt.plot(data_rede, label="Erro Trainning_data", color='b')
-        plt.xlabel('Temporada')
-        plt.ylabel('Erro')
-        plt.title('Erros Trainning_data Test_data')
-        nome = "Erro" + time.strftime("%Y%m%d%H%M", time.localtime())
-        plt.legend()
-        plt.savefig(str(self.id) + "/" + nome + '.png')
-        plt.clf()
-        plt.figure(3)
+
+        for ativo in self.ativos_treinados:
+            plt.figure(index)
+            index += 1
+            data_rede_td = pd.DataFrame(data=ativo.rede.td_error, index=ativo.rede.index, columns=["Error"])
+            data_rede = pd.DataFrame(data=ativo.rede.error, index=ativo.rede.index, columns=["Error"])
+            plt.plot(data_rede_td, label="Err Tes_d " + ativo.nome)
+            plt.plot(data_rede, label="Err Tr_d " + ativo.nome)
+            plt.xlabel('Temporada')
+            plt.ylabel('Erro')
+            plt.title('Erros Trainning_data Test_data')
+            nome = "Erro_" + ativo.nome + "_" + time.strftime("%Y%m%d%H%M", time.localtime())
+            plt.legend()
+            plt.savefig(str(self.id) + "/" + nome + '.png')
+            plt.clf()
+        plt.figure(index)
+        index+=1
         for key in self.nomes_ativos:
             plt.plot(self.df[key], label=key)
 
@@ -191,6 +207,24 @@ class Investidor:
         self.ganho_medio = self.calcula_medio()
         self.print()
 
+        plt.figure(index)
+        index += 1
+
+        for ativo in self.ativos_treinados:
+
+            data = pd.DataFrame(data=ativo.acertos[self.id], index=range(len(ativo.acertos[self.id])), columns=["Acertos"])
+            plt.plot(data, label="Taxa de acertos " + ativo.nome)
+
+        plt.xlabel('Iteração')
+        plt.ylabel('Taxa de acerto')
+        plt.title('Taxa de acerto')
+        nome = "Taxa_de_acertos"
+        plt.legend()
+        plt.savefig(str(self.id) + '/' + nome + '.png')
+
+        plt.clf()
+
+
     def print(self):
 
         media = len(self.trades) / (len(self.df) / 30)
@@ -200,16 +234,26 @@ class Investidor:
             tempomedio = 0
 
         print("Patrimonio Final: ", self.patrimonio,
-              "\nPatrimonio Inicial: ", CAPITAL_INICIAL,
-              "\nGanho do Robô: ", self.patrimonio / CAPITAL_INICIAL,
+              "\nPatrimonio Inicial: ", self.capital_inicial,
+              "\nGanho do Robô: ", self.patrimonio / self.capital_inicial,
               "\nGanho medio da ações: ", self.ganho_medio,
               "\nRelação Robô/Ibovespa: ",
-              (self.patrimonio / CAPITAL_INICIAL) / (self.ganho_ibov),
+              (self.patrimonio / self.capital_inicial) / (self.ganho_ibov),
               "\nRelação Robô/Ganho medio das ações: ",
-              (self.patrimonio / CAPITAL_INICIAL) / (self.ganho_medio),
+              (self.patrimonio / self.capital_inicial) / (self.ganho_medio),
               "\nCompras: ", self.compras,
               "\nVendas: ", self.vendas,
               "\nTempo médio trade : ", tempomedio, "dias",
               "\nMédia de : ", media, "trades por mês",
               "\nValor_Comprado: ", self.valor_comprado,
               "\nValor_Vendido: ", self.valor_vendido)
+        for ativo in self.ativos:
+            print("Taxa de acertos ", ativo.nome, " : ", ativo.acertos / (ativo.acertos + ativo.erros))
+            self.ativo_por_nome(ativo.nome).acertos[self.id].append(ativo.acertos / (ativo.acertos + ativo.erros))
+
+    def ativo_por_nome(self, nome):
+        for ativo in self.ativos_treinados:
+            if ativo.nome == nome:
+                return ativo
+
+        return None

@@ -12,3 +12,6 @@ class Ativo():
         self.predicao = 0
         self.comprado = False
         self.tempo = 0
+        self.acertos = 0
+        self.erros = 0
+        self.valor_anterior = None

@@ -94,9 +94,9 @@ class Network(object):
                 else:
                     print("Epoch {} finalizada".format(self.epochs_trained))
 
-                e2 = self.evaluate(td2)
-                print("Erro 2: {} / {}".format(e2, len(td2)))
-                e2 = e2 / len(td2)
+                e2 = self.evaluate(training_data)
+                print("Erro 2: {} / {}".format(e2, len(training_data)))
+                e2 = e2 / len(training_data)
                 self.error.append(e2)
                 self.index.append(j)
             else:

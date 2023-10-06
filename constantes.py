@@ -2,7 +2,7 @@
 
 IBOV_JAN2022 = 104700
 IBOV_JAN2023 = 109900
-QUANTIDADE = 20 #Quantidade de redes neurais treinadas
+QUANTIDADE = 5000 #Quantidade de redes neurais treinadas
 QUANTIDADEDEREPETICOES = 20 # quantidade de vezes em que o programa será reiniciado e refazer o teino
 QUANTIDADE_DE_ACOES = 10
 
@@ -16,7 +16,7 @@ DFTES = '2023-01-02'
 NUMERODEREDES = 5
 EPOCAS = 500
 MINIBATCH = 30
-TAXA = 0.001
+TAXA = 0.01
 DIAS = 1
 NEURONIOSDEENTRADA = 60
 

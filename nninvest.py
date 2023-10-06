@@ -11,6 +11,14 @@ from funcoes import *
 import time
 import config
 
+class Ativo():
+
+    def __init__(self, nome, data, rede):
+        self.nome = nome
+        self.data = data
+        self.rede = rede
+        self.td = None
+        self.acertos = {}
 
 def main():
 
@@ -40,8 +48,10 @@ def main():
     Alphabet (GOGL34) – Tecnologia: EUA – 10%
     Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
 
+    #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
+    #            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
     carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-                "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
+                "MOSC34.SA", "BRKM5.SA", "GOGl34.SA"]
 
     #carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
     #carteira = ['AAPL34.SA', "GOGl34.SA"]
@@ -52,10 +62,10 @@ def main():
     data = yf.download(carteira, start=constantes.DITR, end=constantes.DFTR)
     dt = data["Adj Close"]
     v = data["Volume"]
+    ativos = []
 
-    data = []
     for key in dt.keys():
-
+        data = []
         if key == "Date":
             continue
         d = dt[key].copy()
@@ -76,31 +86,40 @@ def main():
             saida = numpy.array(saida)
             data.append([entrada, saida])
 
+        ativo = Ativo(key, data, None)
+        ativos.append(ativo)
+
         print(key, " Feito.")
 
-    random.shuffle(data) # embaralha
+    for ativo in ativos:
+        random.shuffle(ativo.data)  # embaralha
 
-    indice = int(len(data) * 0.8) # 80% para treinar a rede
+        indice = int(len(ativo.data) * 0.95)  # 80% para treinar a rede
 
-    td = data[indice:] # data[80:] pego 20% para testar se a rede está aprendendo
-    #d = data[:indice]
-    d = data[:indice] # 80% daos dados para treinar a rede
+        ativo.td = ativo.data[indice:]  # data[80:] pego 20% para testar se a rede está aprendendo
+        # d = data[:indice]
+        ativo.data = ativo.data[:indice]  # 80% daos dados para treinar a rede
+
+    for j in range(constantes.NUMERODEREDES):
+        for i in range(len(ativos)):
+            ativos[i].acertos[j] = []
+
     for j in range(constantes.QUANTIDADEDEREPETICOES):
+
         for i in range(constantes.NUMERODEREDES):
-
-            config.inicial_config(str(i))
-
-            neuralnet = nn.Network.load(str(i) + "/nn.json")
-            if neuralnet:
-                print("Rede carregada")
-                print("Esta rede ja foi treinada %i vezes" %neuralnet.epochs_trained)
-            else:
-                print("Não existe Rede\nCriando nova")
-                neuralnet = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
-
-            neuralnet.SGD(d, constantes.EPOCAS, constantes.MINIBATCH, constantes.TAXA, td)
-            #nome = strstr(i) + ".json"
-            neuralnet.save(str(i) + "/nn.json")
+            for ativo in ativos:
+                config.inicial_config(str(i), ativo.nome)
+                ativo.rede = nn.Network.load(str(i) + '/' + ativo.nome +"/nn.json")
+                if ativo.rede:
+                    print("Rede carregada")
+                    print("Esta rede ja foi treinada %i vezes" %ativo.rede.epochs_trained)
+                else:
+                    print("Não existe Rede\nCriando nova")
+                    ativo.rede = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
+                if j > 0:
+                    ativo.rede.SGD(ativo.data, constantes.EPOCAS, constantes.MINIBATCH, constantes.TAXA, ativo.td)
+                #nome = strstr(i) + ".json"
+                ativo.rede.save(str(i) +"/" + ativo.nome +"/nn.json")
 
             data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
             df = data['Adj Close']
@@ -110,12 +129,11 @@ def main():
 
             ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
             ibov = ibov.dropna(axis=0, how='all')
-            GANHO_IBOV = ibov.values[-1]/ibov.values[29]
-            #constantes.QUANTIDADE = len(df.keys())
+            GANHO_IBOV = ibov.values[-1] / ibov.values[29]
+            # constantes.QUANTIDADE = len(df.keys())
             #constantes.QUANTIDADE_DE_ACOES = int(constantes.QUANTIDADE/2)
 
-
-            inv = Investidor(neuralnet, df, dv, GANHO_IBOV, ibov, ID = i)
+            inv = Investidor(df, dv, GANHO_IBOV, ibov, ID = i, ativos = ativos)
             inv.invest()
 
 if __name__ == "__main__":
