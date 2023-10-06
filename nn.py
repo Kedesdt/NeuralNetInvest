@@ -47,7 +47,8 @@ class Network(object):
     def feedforward(self, a):
         """Retorna a saída da rede se `a` for input."""
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a)+b)
+            #a = sigmoid(np.dot(w, a)+b)
+            a = reLU(np.dot(w, a)+b)
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None):
@@ -139,18 +140,21 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            activation = sigmoid(z)
+            #activation = sigmoid(z)
+            activation = reLU(z)
             activations.append(activation)
         
         # Backward pass
-        delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
+        #delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
+        delta = self.cost_derivative(activations[-1], y) * reLU_d(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         
         # Aqui, l = 1 significa a última camada de neurônios, l = 2 é a 
         for l in range(2, self.num_layers):
             z = zs[-l]
-            sp = sigmoid_prime(z)
+            #sp = sigmoid_prime(z)
+            sp = reLU_d(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
@@ -296,3 +300,15 @@ def sigmoid(z):
 # Função para retornar as derivadas da função Sigmóide
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
+
+# Função de Ativação reLU
+def reLU(z):
+    l = lambda x: x if x > 0 else x/20
+    return np.array(list(map(l, z)))
+
+# Função para retornar as derivadas da função reLU
+def reLU_d(z):
+    l = lambda x: 1 if x > 0 else 1/20
+    a = np.array(list(map(l, z)))
+    a = a.reshape(z.shape)
+    return a

@@ -50,11 +50,11 @@ def main():
 
     #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
     #            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
-    carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-                "MOSC34.SA", "BRKM5.SA", "GOGl34.SA"]
+    #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
+    #            "MOSC34.SA", "BRKM5.SA", "GOGl34.SA"]
 
     #carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
-    #carteira = ['AAPL34.SA', "GOGl34.SA"]
+    carteira = ['AAPL34.SA', "GOGl34.SA"]
 
     #carteira = ['ITUB4.SA', "BBDCA4.SA"]
 
@@ -104,6 +104,16 @@ def main():
         for i in range(len(ativos)):
             ativos[i].acertos[j] = []
 
+    data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
+    df = data['Adj Close']
+    df = df.dropna(axis=0, how='all')
+    dv = data['Volume']
+    dv = dv.dropna(axis=0, how='all')
+
+    ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
+    ibov = ibov.dropna(axis=0, how='all')
+    GANHO_IBOV = ibov.values[-1] / ibov.values[29]
+
     for j in range(constantes.QUANTIDADEDEREPETICOES):
 
         for i in range(constantes.NUMERODEREDES):
@@ -121,15 +131,7 @@ def main():
                 #nome = strstr(i) + ".json"
                 ativo.rede.save(str(i) +"/" + ativo.nome +"/nn.json")
 
-            data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
-            df = data['Adj Close']
-            df = df.dropna(axis=0, how='all')
-            dv = data['Volume']
-            dv = dv.dropna(axis=0, how='all')
 
-            ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
-            ibov = ibov.dropna(axis=0, how='all')
-            GANHO_IBOV = ibov.values[-1] / ibov.values[29]
             # constantes.QUANTIDADE = len(df.keys())
             #constantes.QUANTIDADE_DE_ACOES = int(constantes.QUANTIDADE/2)
 

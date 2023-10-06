@@ -6,17 +6,17 @@ QUANTIDADE = 5000 #Quantidade de redes neurais treinadas
 QUANTIDADEDEREPETICOES = 20 # quantidade de vezes em que o programa será reiniciado e refazer o teino
 QUANTIDADE_DE_ACOES = 10
 
-DITR = '2012-01-02'
+DITR = '2000-01-02'
 DFTR = '2022-01-02'
 
 DITES = '2022-01-02'
 DFTES = '2023-01-02'
 
 
-NUMERODEREDES = 5
-EPOCAS = 500
+NUMERODEREDES = 1
+EPOCAS = 20
 MINIBATCH = 30
-TAXA = 0.01
+TAXA = 0.001
 DIAS = 1
 NEURONIOSDEENTRADA = 60
 

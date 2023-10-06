@@ -5,6 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 
+MIN_COMPRA = 0.75
+
 class Investidor:
 
     def __init__(self, df, dv, ganho_ibov = 1, df_ibov = None, ID = 1, ativos = None):
@@ -140,7 +142,7 @@ class Investidor:
             for j in range(len(ativos_na_ordem)):
                 #if i < QUANTIDADE_DE_ACOES:
                 #    self.vende_ativo(ativos_na_ordem[i])
-                if ativos_na_ordem[j].predicao < 0.5:
+                if ativos_na_ordem[j].predicao < MIN_COMPRA:
                     self.vende_ativo(ativos_na_ordem[j], i)
                 else:
                     comprar.append(ativos_na_ordem[j])
