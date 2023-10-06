@@ -78,11 +78,15 @@ def main():
             #entrada = d[i-29:i+1].values / max(d[i-29:i+1].values)
             e = d[i - 29:i + 1].values #
             edv = dv[i - 29:i + 1].values
-            entrada = geraEntrada(e, edv)
+            entrada = geraEntrada_relacao(e, edv)
             saida = []
             #ranges = [1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.1]
             for j in range(constantes.DIAS):
-                saida.append([1 if d[i+1+j] > d[i] else 0])
+                #saida.append([1 if d[i+1+j] > d[i] else 0])
+                if d[i]:
+                    saida.append([d[i + 1 + j] / d[i]])
+                else:
+                    saida.append([0])
             saida = numpy.array(saida)
             data.append([entrada, saida])
 

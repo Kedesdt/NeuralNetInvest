@@ -113,6 +113,10 @@ class Network(object):
         
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+            #tem_nan = np.isnan(delta_nabla_b).any()
+            #tem_inf = np.isinf(delta_nabla_w).any()
+            #if tem_inf or tem_nan:
+            #    print("Erro")
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         

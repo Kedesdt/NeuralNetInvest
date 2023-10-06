@@ -118,7 +118,7 @@ class Investidor:
                 if ativo.valor_inicial is None:
                     ativo.valor_inicial = ativo.valor
 
-                entrada = geraEntrada(d[key], dv[key])
+                entrada = geraEntrada_relacao(d[key], dv[key])
                 saidas[key] = self.ativo_por_nome(key).rede.feedforward(entrada)
                 ativo.valor = d[key].values[-1]
                 ativo.predicao = saidas[key][0][0]
@@ -131,30 +131,26 @@ class Investidor:
 
             ativos_na_ordem = []
             comprar = []
+            predicoes_comprar = []
 
             err = False
             for j in predicoes:
-                ativos_na_ordem.append(self.get_by_pre(j))
-                if ativos_na_ordem[-1] is None:
-                    err = True
+                if j > 1:
+                    ativos_na_ordem.append(self.get_by_pre(j))
+                    comprar.append(self.get_by_pre(j))
+                    predicoes_comprar.append(j)
+                    if ativos_na_ordem[-1] is None:
+                        err = True
             if err:
                 continue
-            for j in range(len(ativos_na_ordem)):
-                #if i < QUANTIDADE_DE_ACOES:
-                #    self.vende_ativo(ativos_na_ordem[i])
-                if ativos_na_ordem[j].predicao < MIN_COMPRA:
-                    self.vende_ativo(ativos_na_ordem[j], i)
-                else:
-                    comprar.append(ativos_na_ordem[j])
+            for j in range(len(self.ativos)):
+                self.vende_ativo(self.ativos[j], i)
 
             #q = QUANTIDADE - QUANTIDADE_DE_ACOES
             q = len(comprar)
-            if not q:
-                q = 1
-            valor = self.dinheiro_disponivel / q
-            if valor > 0:
+            if q > 0:
                 for j in comprar:
-                    #if i >= QUANTIDADE_DE_ACOES:
+                    valor = j.predicao * (self.dinheiro_disponivel / sum(predicoes_comprar))
                     self.compra_ativo(j, valor, i)
 
             self.dinheiro_investido = 0
