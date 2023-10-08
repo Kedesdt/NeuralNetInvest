@@ -3,20 +3,20 @@
 IBOV_JAN2022 = 104700
 IBOV_JAN2023 = 109900
 QUANTIDADE = 5000 #Quantidade de redes neurais treinadas
-QUANTIDADEDEREPETICOES = 20 # quantidade de vezes em que o programa será reiniciado e refazer o teino
+QUANTIDADEDEREPETICOES = 30 # quantidade de vezes em que o programa será reiniciado e refazer o teino
 QUANTIDADE_DE_ACOES = 10
 
-DITR = '2021-01-02'
+DITR = '2018-01-02'
 DFTR = '2022-01-02'
 
 DITES = '2022-01-02'
-DFTES = '2023-01-02'
+DFTES = '2023-10-01'
 
 
-NUMERODEREDES = 2
-EPOCAS = 20
+NUMERODEREDES = 10
+EPOCAS = 10
 MINIBATCH = 30
-TAXA = 0.001
+TAXA = 0.00001
 DIAS = 1
 NEURONIOSDEENTRADA = 60
 

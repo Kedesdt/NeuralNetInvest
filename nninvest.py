@@ -19,6 +19,7 @@ class Ativo():
         self.rede = rede
         self.td = None
         self.acertos = {}
+        self.lucros = {}
 
 def main():
 
@@ -48,13 +49,16 @@ def main():
     Alphabet (GOGL34) – Tecnologia: EUA – 10%
     Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
 
+    carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
+                "AAPL34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA', "ABEV3.SA",
+                'VALE3.SA', 'ITUB4.SA', 'BBDC4.SA', 'B3SA3.SA', 'SANB11.SA',
+                'BBAS3.SA', 'PCAR3.SA', 'GGBR4.SA', 'CSNA3.SA', 
+                'CIEL3.SA', 'HYPE3.SA', 'ELET6.SA', 'UGPA3.SA']
     #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-    #            "C1TV34.SA", "MOSC34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA']
-    #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-    #            "MOSC34.SA", "BRKM5.SA", "GOGl34.SA"]
+    #            "BRKM5.SA", "GOGl34.SA", "AAPL34.SA"]
 
     #carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
-    carteira = ['AAPL34.SA', "GOGl34.SA"]
+    #carteira = ['AAPL34.SA', "GOGl34.SA"]
 
     #carteira = ['ITUB4.SA', "BBDCA4.SA"]
 
@@ -62,6 +66,9 @@ def main():
     data = yf.download(carteira, start=constantes.DITR, end=constantes.DFTR)
     dt = data["Adj Close"]
     v = data["Volume"]
+
+    dt = dt.dropna(axis=0, how='all')
+    v = v.dropna(axis=0, how='all')
     ativos = []
 
     for key in dt.keys():
@@ -71,8 +78,8 @@ def main():
         d = dt[key].copy()
         dv = v[key].copy()
         #print(d)
-        d = d.dropna(axis=0, how='all')
-        dv = dv.dropna(axis=0, how='all')
+        d = d.dropna()
+        dv = dv.dropna()
         #print(d)
         for i in range(29, len(d) - constantes.DIAS): # pegar do dia 29 até o penultimo dia
             #entrada = d[i-29:i+1].values / max(d[i-29:i+1].values)
@@ -107,15 +114,15 @@ def main():
     for j in range(constantes.NUMERODEREDES):
         for i in range(len(ativos)):
             ativos[i].acertos[j] = []
+            ativos[i].lucros[j] = []
 
     data = yf.download(carteira, start=constantes.DITES, end=constantes.DFTES)
     df = data['Adj Close']
-    df = df.dropna(axis=0, how='all')
+    df = df.dropna()
     dv = data['Volume']
-    dv = dv.dropna(axis=0, how='all')
-
+    dv = dv.dropna()
     ibov = yf.download("^BVSP", start=constantes.DITES, end=constantes.DFTES)['Adj Close']
-    ibov = ibov.dropna(axis=0, how='all')
+    ibov = ibov.dropna()
     GANHO_IBOV = ibov.values[-1] / ibov.values[29]
 
     for j in range(constantes.QUANTIDADEDEREPETICOES):
@@ -131,7 +138,8 @@ def main():
                     print("Não existe Rede\nCriando nova")
                     ativo.rede = nn.Network([constantes.NEURONIOSDEENTRADA, 40, 20, constantes.DIAS])
                 if j > 0:
-                    ativo.rede.SGD(ativo.data, constantes.EPOCAS, constantes.MINIBATCH, constantes.TAXA, ativo.td)
+                    print(ativo.nome)
+                    ativo.rede.SGD(ativo.data, constantes.EPOCAS * j, constantes.MINIBATCH, constantes.TAXA, ativo.td)
                 #nome = strstr(i) + ".json"
                 ativo.rede.save(str(i) +"/" + ativo.nome +"/nn.json")
 

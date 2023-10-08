@@ -58,6 +58,7 @@ class Investidor:
 
     def vende_ativo(self, ativo, i):
 
+
         valor = ativo.cotas_compradas * ativo.valor
         self.dinheiro_disponivel += valor
         ativo.cotas_compradas = 0
@@ -106,14 +107,19 @@ class Investidor:
                 if ativo.valor_anterior:
                     if ativo.comprado:
                         if ativo.valor < ativo.valor_anterior:
+                            ativo.lucro +=  (ativo.valor / ativo.valor_anterior) - 1
                             ativo.erros += 1
                         else:
                             ativo.acertos += 1
+                            ativo.lucro +=  (ativo.valor / ativo.valor_anterior) - 1
+                        
                     else:
                         if ativo.valor > ativo.valor_anterior:
+                            ativo.lucro -=  (ativo.valor / ativo.valor_anterior) - 1
                             ativo.erros += 1
                         else:
                             ativo.acertos += 1
+                            ativo.lucro -=  (ativo.valor / ativo.valor_anterior) - 1
                 ativo.valor_anterior = ativo.valor
                 if ativo.valor_inicial is None:
                     ativo.valor_inicial = ativo.valor
@@ -149,8 +155,9 @@ class Investidor:
             #q = QUANTIDADE - QUANTIDADE_DE_ACOES
             q = len(comprar)
             if q > 0:
+                disponivel = self.dinheiro_disponivel
                 for j in comprar:
-                    valor = j.predicao * (self.dinheiro_disponivel / sum(predicoes_comprar))
+                    valor = j.predicao * (disponivel / sum(predicoes_comprar))
                     self.compra_ativo(j, valor, i)
 
             self.dinheiro_investido = 0
@@ -222,6 +229,23 @@ class Investidor:
 
         plt.clf()
 
+        plt.figure(index)
+        index += 1
+
+        for ativo in self.ativos_treinados:
+
+            data = pd.DataFrame(data=ativo.lucros[self.id], index=range(len(ativo.lucros[self.id])), columns=["Lucro"])
+            plt.plot(data, label="Lucro " + ativo.nome)
+
+        plt.xlabel('Iteração')
+        plt.ylabel('Lucro')
+        plt.title('Lucro')
+        nome = "Lucro"
+        plt.legend()
+        plt.savefig(str(self.id) + '/' + nome + '.png')
+
+        plt.clf()
+
 
     def print(self):
 
@@ -248,6 +272,8 @@ class Investidor:
         for ativo in self.ativos:
             print("Taxa de acertos ", ativo.nome, " : ", ativo.acertos / (ativo.acertos + ativo.erros))
             self.ativo_por_nome(ativo.nome).acertos[self.id].append(ativo.acertos / (ativo.acertos + ativo.erros))
+            print("Lucro ", ativo.nome, " : ", ativo.lucro)
+            self.ativo_por_nome(ativo.nome).lucros[self.id].append(ativo.lucro)
 
     def ativo_por_nome(self, nome):
         for ativo in self.ativos_treinados:

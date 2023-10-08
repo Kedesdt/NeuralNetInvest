@@ -119,6 +119,13 @@ class Network(object):
             #    print("Erro")
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+
+        for bias in nabla_b:
+            if np.isnan(bias).any():
+                return
+        for weight in nabla_w:
+            if np.isnan(weight).any():
+                return
         
         self.weights = [w-(eta/len(mini_batch))*nw for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(eta/len(mini_batch))*nb for b, nb in zip(self.biases, nabla_b)]
@@ -248,6 +255,13 @@ class Network(object):
         self.sizes
         self.biases
         self.weights
+
+        for bias in self.biases:
+            if np.isnan(bias).any():
+                return
+        for weight in self.weights:
+            if np.isnan(weight).any():
+                return
 
         biases = []
         for bias in self.biases:

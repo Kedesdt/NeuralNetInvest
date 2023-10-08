@@ -14,4 +14,5 @@ class Ativo():
         self.tempo = 0
         self.acertos = 0
         self.erros = 0
+        self.lucro = 0
         self.valor_anterior = None
