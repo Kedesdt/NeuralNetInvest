@@ -49,18 +49,19 @@ def main():
     Alphabet (GOGL34) – Tecnologia: EUA – 10%
     Trend ACWI (ACWI11) – Multisetorial: Mundo – 10%"""
 
-    carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-                "AAPL34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA', "ABEV3.SA",
-                'VALE3.SA', 'ITUB4.SA', 'BBDC4.SA', 'B3SA3.SA', 'SANB11.SA',
-                'BBAS3.SA', 'PCAR3.SA', 'GGBR4.SA', 'CSNA3.SA', 
-                'CIEL3.SA', 'HYPE3.SA', 'ELET6.SA', 'UGPA3.SA']
     #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
-    #            "BRKM5.SA", "GOGl34.SA", "AAPL34.SA"]
+    #            "AAPL34.SA", "BRKM5.SA", "GOGl34.SA", 'ACWI11.SA', "ABEV3.SA",
+    #            'VALE3.SA', 'ITUB4.SA', 'BBDC4.SA', 'B3SA3.SA', 'SANB11.SA',
+    #            'BBAS3.SA', 'PCAR3.SA', 'GGBR4.SA', 'CSNA3.SA', 
+    #            'CIEL3.SA', 'HYPE3.SA', 'ELET6.SA', 'UGPA3.SA']
+    #carteira = ["ITSA4.SA", "SUZB3.SA", 'PETR4.SA', 'JBSS3.SA', "RAIL3.SA",
+    #            "BRKM5.SA", "GOGl34.SA", "AAPL34.SA", "BBDCA4.SA", "ELET6.SA"]
 
     #carteira = ['AAPL34.SA', "GOGl34.SA", "MSFT34.SA", "AMZO34.SA"]
     #carteira = ['AAPL34.SA', "GOGl34.SA"]
 
     #carteira = ['ITUB4.SA', "BBDCA4.SA"]
+    carteira = ['B3SA3.SA', "GOGl34.SA"]
 
 
     data = yf.download(carteira, start=constantes.DITR, end=constantes.DFTR)
@@ -103,7 +104,7 @@ def main():
         print(key, " Feito.")
 
     for ativo in ativos:
-        random.shuffle(ativo.data)  # embaralha
+        #random.shuffle(ativo.data)  # embaralha
 
         indice = int(len(ativo.data) * 0.95)  # 80% para treinar a rede
 

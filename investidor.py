@@ -144,7 +144,7 @@ class Investidor:
                 if j > 1:
                     ativos_na_ordem.append(self.get_by_pre(j))
                     comprar.append(self.get_by_pre(j))
-                    predicoes_comprar.append(j)
+                    predicoes_comprar.append(j - 1)
                     if ativos_na_ordem[-1] is None:
                         err = True
             if err:
@@ -157,7 +157,8 @@ class Investidor:
             if q > 0:
                 disponivel = self.dinheiro_disponivel
                 for j in comprar:
-                    valor = j.predicao * (disponivel / sum(predicoes_comprar))
+                    #valor = j.predicao * (disponivel / sum(predicoes_comprar))
+                    valor = (j.predicao - 1) * (disponivel / sum(predicoes_comprar))
                     self.compra_ativo(j, valor, i)
 
             self.dinheiro_investido = 0
